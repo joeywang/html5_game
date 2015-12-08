@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class=" -moz-" manifest="game.appcache" lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>CSS3 Matching Game</title>
+  <style data-href="http://fonts.googleapis.com/css?family=Droid+Serif:regular,bold&amp;subset=latin" media="">@font-face {
+  font-family: 'Droid Serif';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Droid Serif'), local('DroidSerif'), url(http://fonts.gstatic.com/s/droidserif/v6/0AKsP294HTD-nvJgucYTaIgp9Q8gbYrhqGlRav_IXfk.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Droid Serif';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Droid Serif Bold'), local('DroidSerif-Bold'), url(http://fonts.gstatic.com/s/droidserif/v6/QQt14e8dY39u-eYBZmppwf79_ZuUxCigM2DespTnFaw.woff2) format('woff2');
+}
+</style>
+  <style data-href="http://fonts.googleapis.com/css?family=Orbitron:400,700" media="">@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Orbitron-Light'), local('Orbitron-Regular'), url(http://fonts.gstatic.com/s/orbitron/v7/HmnHiRzvcnQr8CjBje6GQnYhjbSpvc47ee6xR_80Hnw.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Orbitron-Bold'), url(http://fonts.gstatic.com/s/orbitron/v7/Y82YH_MJJWnsH2yUA5AuYYgp9Q8gbYrhqGlRav_IXfk.woff2) format('woff2');
+}
+</style>
+  <style data-href="css/matchgame.css" media="">body {
+  font-family: 'Droid Serif', Arial, serif;
+  text-align: center;
+  background: BROWN url("images/bg.jpg");
+}
+
+#game {
+  background: #9c9;
+  padding: 5px;
+
+  position: relative;
+  background: #232 url("images/table.jpg");
+  width: 500px;
+  height: 460px;
+  margin: 0 auto;
+
+  border-radius: 10px;
+  border: 1px solid #666;
+  box-shadow: 0 -1px 0 #999, 0 1px 0 #999, inset 0 1px 6px #000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#cards {
+  position: relative;
+  width: 380px;
+  height: 400px;
+}
+
+/* Define the 3D perspective view and dimension of each card. */
+.card {
+  perspective: 600px;
+  position: absolute;
+  width: 80px;
+  height: 120px;
+  transition: all .3s;
+}
+.face {
+  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transition: all .3s;
+  backface-visibility: hidden;
+}
+
+.front {
+  background: #999 url("images/deck.png") 0 -480px;
+}
+.back {
+  background: #efefef url("images/deck.png");
+  transform: rotate3d(0,1,0,-180deg);
+}
+
+.card-flipped .front {
+  transform: rotate3d(0,1,0,180deg);
+}
+.card-flipped .back {
+  transform: rotate3d(0,1,0,0deg);
+}
+
+.card-removed {
+  opacity: 0;
+}
+
+/* define the face graphics of the card deck*/
+/* cardAA stands for Spade A */
+/* cardA10 stands for Spade 10 */
+/* cardAK stands for Spade K */
+/* cardB_ stands for Heart _ */
+/* cardC_ stands for Club _ */
+/* cardD_ stands for Diamond _ */
+
+.cardAJ {background-position: -800px 0;}
+.cardAQ {background-position: -880px 0;}
+.cardAK {background-position: -960px 0;}
+.cardBJ {background-position: -800px -120px;}
+.cardBQ {background-position: -880px -120px;}
+.cardBK {background-position: -960px -120px;}
+.cardCJ {background-position: -800px -240px;}
+.cardCQ {background-position: -880px -240px;}
+.cardCK {background-position: -960px -240px;}
+.cardDJ {background-position: -800px -360px;}
+.cardDQ {background-position: -880px -360px;}
+.cardDK {background-position: -960px -360px;}
+
+
+/* Styles for game over popup */
+#popup {
+  font-family: 'Orbitron', serif;
+  font-size: 28px;
+  font-weight: 700;
+  text-shadow: 0px 1px 2px #fff;
+
+  color: #222;
+
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+
+  background: rgba(0,0,0,.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: all .5s ease-in;
+}
+
+#popup h1 {
+  font-weight: 400;
+}
+
+#popup-box {
+  position: relative;
+  width: 400px;
+  height: 300px;
+  background: #ccc url("images/popup_bg.jpg");
+
+  border-radius: 10px;
+
+  box-shadow: 0 5px 5px #333;
+
+  display: -moz-box;
+  -moz-box-pack: center;
+  -moz-box-align: center;
+
+  transition: all .5s ease-in;
+}
+
+#popup-box small {
+  font-size: .6em;
+}
+
+/**
+ * Styles to hide the popup -moz-box
+ */
+#popup.hide {
+  background: rgba(0,0,0,0);
+  visibility: hidden;
+}
+#popup.hide #popup-box{
+  margin-top: -800px;
+}
+
+
+.ribbon.hide {
+  display: none;
+}
+.ribbon {
+  float: left;
+  position: absolute;
+  left: -7px;
+  top: 165px;
+  z-index: 0;
+
+  font-size: .5em;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.ribbon-body {
+  height: 14px;
+  background: #ca3d33;
+  padding: 6px;
+  z-index: 100;
+  box-shadow: 2px 2px 0 rgba(150,120,70,.4);
+  border-radius: 0 5px 5px 0;
+
+  color: #fff;
+  text-shadow: 0px 1px 1px rgba(0,0,0,.3);
+}
+
+.triangle{
+  position: relative;
+  height: 0px;
+  width: 0;
+  left: -5px;
+  top: -32px;
+  border-style: solid;
+  border-width: 6px;
+  border-color: transparent #882011 transparent transparent;
+  z-index: -1;
+}
+</style>
+</head>
+<body>
+  <header>
+    <h1>CSS3 Matching Game</h1>
+  </header>
+
+  <div id="timer">
+    Elapsed time: <span id="elapsed-time">197:02</span>
+  </div>
+  <section id="game">
+    <div id="cards">
+      <div data-card-index="0" style="transform: translateX(0px) translateY(0px);" class="card">
+        <div class="face front"></div>
+        <div class="face back"></div>
+      </div> <!-- .card -->
+    </div> <!-- #cards -->
+  </section> <!-- #game -->
+
+  <section id="popup" class="hide">
+    <div id="popup-bg">
+    </div>
+    <div id="popup-box">
+      <div class="ribbon hide">
+        <div class="ribbon-body">
+           <span>New Record</span>
+        </div>
+        <div class="triangle"></div>
+      </div>
+      <div id="popup-box-content">
+        <h1>You Won!</h1>
+        <p>Your Score:</p>
+        <p><span class="score">13</span></p>
+        <p>
+          <small>Last Score: <span class="last-score">0</span><br>
+            Saved on: <span class="saved-time"></span>
+          </small>
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <footer>
+    <p>This is an example of creating a matching game with CSS3.</p>
+  </footer>
+
+  <script src="js/jquery-2.js"></script>
+  <script src="js/prefixfree.js"></script>
+  <script src="js/matchgame.js"></script>
+
+
+</body></html>
