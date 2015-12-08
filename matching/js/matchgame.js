@@ -22,7 +22,15 @@
     'cardBK', 'cardBK',
     'cardBQ', 'cardBQ',
     'cardBJ', 'cardBJ',
+    'cardCK', 'cardCK',
+    'cardCQ', 'cardCQ',
+    'cardCJ', 'cardCJ',
+    'cardDK', 'cardDK',
+    'cardDQ', 'cardDQ',
+    'cardDJ', 'cardDJ',
   ];
+
+  matchingGame.card = $('.card:first-child').detach();
 
   function shuffle() {
     return 0.5 - Math.random();
@@ -74,6 +82,91 @@
   function saveSavingObject() {
      // save the encoded saving object into local storage
      localStorage["savingObject"] = JSON.stringify(matchingGame.savingObject);
+  }
+
+  function gamestart() {
+    var ROW = 8;
+    // reset the elapsed time to 0.
+    matchingGame.elapsedTime = 0;
+
+    // start the timer
+    matchingGame.timer = setInterval(countTimer, 1000);
+
+    // shuffle the deck.
+    matchingGame.deck.sort(shuffle);
+
+    // re-create the saved deck
+    var savedObject = savedSavingObject();
+    if (savedObject !== undefined && savedObject.deck.length > 0) {
+      matchingGame.deck = savedObject.deck;
+    }
+
+    // reset the elapsed time to 0.
+    matchingGame.elapsedTime = 0;
+
+    // restore the saved elapsed time
+    if (savedObject !== undefined)
+    {
+       matchingGame.elapsedTime = savedObject.currentElapsedTime;
+       matchingGame.savingObject.currentElapsedTime = savedObject.
+       currentElapsedTime;
+    }
+
+    // copying the deck into saving object.
+    matchingGame.savingObject.deck = matchingGame.deck.slice();
+
+
+    $("#cards").empty();
+
+    total = matchingGame.deck.length;
+    for(var i=1;i<=total;i++){
+      matchingGame.card.clone().appendTo("#cards");
+    }
+
+    var deck = matchingGame.deck.slice();
+    $("#cards").width(100 * ROW);
+    $("#cards").height(140 * total / ROW);
+
+    $("#cards").children().each(function(index) {
+      var x = ($(this).width()  + 20) * (index % ROW);
+      var y = ($(this).height() + 20) * Math.floor(index / ROW);
+      $(this).css("transform", "translateX(" + x + "px) translateY(" + y + "px)");
+
+      // get a pattern from the shuffled deck
+      var pattern = deck.pop();
+
+      // visually apply the pattern on the card's back side.
+      $(this).find(".back").addClass(pattern);
+
+      // embed the pattern data into the DOM element.
+      $(this).attr("data-pattern",pattern);
+
+      // save the index into the DOM element, so we know which is the next card.
+      $(this).attr("data-card-index",index);
+
+      // listen the click event on each card DIV element.
+      $(this).click(selectCard);
+    });
+
+    // removed cards that were removed in savedObject.
+    if (savedObject !== undefined) {
+      matchingGame.savingObject.removedCards =
+        savedObject.removedCards;
+      // find those cards and remove them.
+      for(var i in matchingGame.savingObject.removedCards) {
+        $(".card[data-card-index="+matchingGame.savingObject.
+          removedCards[i]+"]").remove();
+      }
+    }
+  }
+
+  function gamereset() {
+    // stop the timer
+    clearInterval(matchingGame.timer);
+
+    //at last, we clear the saved savingObject
+    localStorage.removeItem("savingObject");
+    gamestart();
   }
 
   function gameover() {
@@ -170,71 +263,10 @@
 
   $(document).ready(function(){
 
-    // reset the elapsed time to 0.
-    matchingGame.elapsedTime = 0;
-
-    // start the timer
-    matchingGame.timer = setInterval(countTimer, 1000);
-
-    // shuffle the deck.
-    matchingGame.deck.sort(shuffle);
-
-    // re-create the saved deck
-    var savedObject = savedSavingObject();
-    if (savedObject !== undefined) {
-      matchingGame.deck = savedObject.deck;
-    }
-
-    // reset the elapsed time to 0.
-    matchingGame.elapsedTime = 0;
-
-    // restore the saved elapsed time
-    if (savedObject !== undefined)
-    {
-       matchingGame.elapsedTime = savedObject.currentElapsedTime;
-       matchingGame.savingObject.currentElapsedTime = savedObject.
-       currentElapsedTime;
-    }
-
-    // copying the deck into saving object.
-    matchingGame.savingObject.deck = matchingGame.deck.slice();
-
-
-    for(var i=0;i<11;i++){
-      $(".card:first-child").clone().appendTo("#cards");
-    }
-
-    $("#cards").children().each(function(index) {
-      var x = ($(this).width()  + 20) * (index % 4);
-      var y = ($(this).height() + 20) * Math.floor(index / 4);
-      $(this).css("transform", "translateX(" + x + "px) translateY(" + y + "px)");
-
-      // get a pattern from the shuffled deck
-      var pattern = matchingGame.deck.pop();
-
-      // visually apply the pattern on the card's back side.
-      $(this).find(".back").addClass(pattern);
-
-      // embed the pattern data into the DOM element.
-      $(this).attr("data-pattern",pattern);
-
-      // save the index into the DOM element, so we know which is the next card.
-      $(this).attr("data-card-index",index);
-
-      // listen the click event on each card DIV element.
-      $(this).click(selectCard);
+    gamestart();
+    $(".gameReset").bind("click", function(e) {
+      e.preventDefault();
+      gamereset();
     });
-
-    // removed cards that were removed in savedObject.
-    if (savedObject !== undefined) {
-      matchingGame.savingObject.removedCards =
-        savedObject.removedCards;
-      // find those cards and remove them.
-      for(var i in matchingGame.savingObject.removedCards) {
-        $(".card[data-card-index="+matchingGame.savingObject.
-          removedCards[i]+"]").remove();
-      }
-    }
-
   });
 })(jQuery);
